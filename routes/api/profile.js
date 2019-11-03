@@ -183,6 +183,34 @@ router.delete('/', auth, async (req, res) => {
   }
 });
 
+// @route    DELETE api/profile
+// @desc     Delete profile, user & posts
+// @access   Private
+router.delete('/', auth, async (req, res) => {
+  try {
+    // Remove user posts
+    await Post.deleteMany({
+      user: req.user.id
+    });
+    // Remove profile
+    await Profile.findOneAndRemove({
+      user: req.user.id
+    });
+    // Remove user
+    await User.findOneAndRemove({
+      _id: req.user.id
+    });
+
+    res.json({
+      msg: 'User deleted'
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
+
 //@route    Put api/Profile/experience
 //@desc     add an experience 
 //@access   Private
@@ -240,24 +268,54 @@ router.put("/experience", [auth, [
 //@desc     Delete profile user and post 
 //@access   Private 
 
-router.delete('./experience/:exp_id', auth, async (req, res) => {
+// router.delete('/experience/:exp_id', auth, async (req, res) => {
+//   try {
+//     const profile = await Profile.findOne({
+//       user: req.params.user_id
+//     });
+
+//     const removeIndex = profile.experience.map(item => item.id).indexOf(req.params.exp_id);
+
+//     profile.experience.splice(removeIndex, 1);
+
+//     await profile.save();
+
+//     res.json(profile)
+//   } catch (err) {
+//     console.error(err.message)
+//     res.status(500).send("Server Error")
+//   }
+// })
+
+router.delete('/experience/:exp_id', auth, async (req, res) => {
   try {
-    const profile = await Profile.findOne({
-      user: req.params.user_id
+    const foundProfile = await Profile.findOne({
+      user: req.user.id
     });
-
-    const removeIndex = profile.experience.map(item => item.id).indexOf(req.params.exp_id);
-
-    profile.experience.splice(removeIndex, 1);
-
-    await profile.save();
-
-    res.json(profile)
-  } catch (err) {
-    console.error(err.message)
-    res.status(500).send("Server Error")
+    const expIds = foundProfile.experience.map(exp => exp._id.toString());
+    // if i dont add .toString() it returns this weird mongoose coreArray and the ids are somehow objects and it still deletes anyway even if you put /experience/5
+    const removeIndex = expIds.indexOf(req.params.exp_id);
+    if (removeIndex === -1) {
+      return res.status(500).json({
+        msg: 'Server error'
+      });
+    } else {
+      // theses console logs helped me figure it out
+      console.log('expIds', expIds);
+      console.log('typeof expIds', typeof expIds);
+      console.log('req.params', req.params);
+      console.log('removed', expIds.indexOf(req.params.exp_id));
+      foundProfile.experience.splice(removeIndex, 1);
+      await foundProfile.save();
+      return res.status(200).json(foundProfile);
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      msg: 'Server error'
+    });
   }
-})
+});
 
 //@route    Put api/Profile/education
 //@desc     Delete profile user and post 
@@ -334,6 +392,10 @@ router.delete('/education/:edu_id', auth, async (req, res) => {
     res.status(500).send("Server Error")
   }
 })
+
+
+
+
 
 //@route    GET api/Profile/github/:username
 //@desc     get use repos from github 
