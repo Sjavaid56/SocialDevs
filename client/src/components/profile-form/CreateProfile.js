@@ -59,9 +59,7 @@ const CreateProfile = ({ createProfile, history }) => {
             <option value='Product Manager'>Product Manager</option>
             <option value='Systems Administrator'>Systems Administrator</option>
             <option value='Junior Developer'>Junior Engineer</option>
-            <option value='Junior to Mid-Level Engineer'>
-              Junior To Mid Level Engineer
-            </option>
+            <option value='Software Engineer'>Software Engineer</option>
             <option value='Senior Developer'>Senior Engineer</option>
             <option value='Manager'>Manager</option>
             <option value='Student or Learning'>Student or Learning</option>
