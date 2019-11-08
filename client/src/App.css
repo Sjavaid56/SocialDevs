@@ -487,6 +487,13 @@ button {
   text-align: center;
 }
 
+.by {
+  margin-top: 50px;
+  font-size: 1.4rem;
+  font: bold;
+  font-style: 'Raleway', sans-serif;
+}
+
 .post img {
   width: 100px;
 }
